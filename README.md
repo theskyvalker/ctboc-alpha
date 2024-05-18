@@ -2,6 +2,12 @@
 
 client contains the frontend and ctboc folder contains the Dojo contracts and scripts for the on-chain logic.
 
+App is hosted in two versions:
+
+Slot Deployment using Katana: https://test.ctboc.bannersnft.com
+
+Sepolia Testnet Deployment: https://staging.ctboc.bannersnft.com
+
 # TODOs and Roadmap
 
 ## May
