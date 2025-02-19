@@ -1,141 +1,88 @@
-import { useComponentValue, } from "@dojoengine/react";
+import { useComponentValue, useQuerySync, } from "@dojoengine/react";
 import { Entity } from "@dojoengine/recs";
 import { useEffect, useState } from "react";
 import "./App.css";
-import { useDojo } from "./DojoContext";
+import { useDojo } from "./dojo/useDojo";
 import { GAME_STAGES } from "./utils";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import { shortString } from "starknet";
+import { useAccount } from "@starknet-react/core";
+import Lobby from "./Lobby";
 
 function App() {
     const {
         setup: {
             systemCalls: { spawn, enroll, unenroll, assignGeneral, unassignGeneral, fortify, sharpen, attack, pay, buyrank, changegamestage, devchangegamestage },
-            components: { Game, GameWorld, Player, GlobalPlayerStats, PlayerCooldowns, PlayerEnrollment },
-        },
-        account: {
-            create,
-            list,
-            select,
-            account,
-            isDeploying,
-            clear,
-            copyToClipboard,
-            applyFromClipboard,
-        },
+            clientComponents: { Game, GameWorld, Player, GlobalPlayerStats, PlayerCooldowns, PlayerEnrollment },
+            contractComponents,
+            client,
+            toriiClient
+        }
     } = useDojo();
 
-    const [clipboardStatus, setClipboardStatus] = useState({
-        message: "",
-        isError: false,
-    });
+    const { account } = useAccount();
+
+    useQuerySync(toriiClient, contractComponents as any, []);
 
     const searchParams = new URLSearchParams(document.location.search);
 
-    console.log(searchParams.get("gameId"));
-
     const activeGameId = parseInt(searchParams.get("gameId") || "0");
-    console.log("activeGameId: ", activeGameId);
-    console.log("account.address: ", account.address);
 
-    var playerGameId = getEntityIdFromKeys([BigInt(account.address), BigInt(activeGameId)]) as Entity;
-    var playerGlobalId = getEntityIdFromKeys([BigInt(account.address)]) as Entity;
-    var gameWorldId = getEntityIdFromKeys([BigInt(shortString.encodeShortString("game"))]) as Entity;
-    var gameId = getEntityIdFromKeys([BigInt(activeGameId)]) as Entity;
-
-    console.log("activeGameId: ", activeGameId);
-    console.log("playerGameId: ", playerGameId);
-    console.log("playerGlobalId: ", playerGlobalId);
-    console.log("gameWorldId: ", gameWorldId);
-    console.log("gameId: ", gameId);
-
-    // get current component values
-    var playerGlobalStats = useComponentValue(GlobalPlayerStats, playerGlobalId);
-    var playerGameStats = useComponentValue(Player, playerGameId);
-    var gameWorld = useComponentValue(GameWorld, gameWorldId);
-    var game = useComponentValue(Game, gameId);
-    var playerCooldowns = useComponentValue(PlayerCooldowns, playerGameId);
-    var playerEnrolment = useComponentValue(PlayerEnrollment, playerGameId);
-
-    console.log("playerGlobalStats: ", playerGlobalStats);
-    console.log("playerGameStats: ", playerGameStats);
-    console.log("gameWorld: ", gameWorld);
-    console.log("game: ", game);
-    console.log("playerCooldowns: ", playerCooldowns);
-    console.log("playerEnrolment: ", playerEnrolment);
-
-    const handleRestoreBurners = async () => {
-        try {
-            await applyFromClipboard();
-            setClipboardStatus({
-                message: "Burners restored successfully!",
-                isError: false,
-            });
-        } catch (error) {
-            setClipboardStatus({
-                message: `Failed to restore burners from clipboard`,
-                isError: true,
-            });
-        }
-    };
+    const [playerGameId, setPlayerGameId] = useState(getEntityIdFromKeys([BigInt(account?.address || "0x0"), BigInt(activeGameId)]) as Entity);
+    const [playerGlobalId, setPlayerGlobalId] = useState(getEntityIdFromKeys([BigInt(account?.address || "0x0")]) as Entity);
+    const [gameWorldId, setGameWorldId] = useState(getEntityIdFromKeys([BigInt(shortString.encodeShortString("game"))]) as Entity);
+    const [gameId, setGameId] = useState(getEntityIdFromKeys([BigInt(activeGameId)]) as Entity);
 
     useEffect(() => {
-        if (clipboardStatus.message) {
-            const timer = setTimeout(() => {
-                setClipboardStatus({ message: "", isError: false });
-            }, 3000);
+        
+        if (account) {
+            console.log(account);
+            console.log("activeGameId: ", activeGameId);
+            console.log("account.address: ", account.address);
+    
+            setPlayerGameId(getEntityIdFromKeys([BigInt(account?.address || "0x0"), BigInt(activeGameId)]) as Entity);
+            setPlayerGlobalId(getEntityIdFromKeys([BigInt(account?.address || "0x0")]) as Entity);
+            setGameWorldId(getEntityIdFromKeys([BigInt(shortString.encodeShortString("game"))]) as Entity);
+            setGameId(getEntityIdFromKeys([BigInt(activeGameId)]) as Entity);
 
-            return () => clearTimeout(timer);
+            console.log("activeGameId: ", activeGameId);
+            console.log("playerGameId: ", playerGameId);
+            console.log("playerGlobalId: ", playerGlobalId);
+            console.log("gameWorldId: ", gameWorldId);
+            console.log("gameId: ", gameId);
+
+            console.log("playerGlobalStats: ", playerGlobalStats);
+            console.log("playerGameStats: ", playerGameStats);
+            console.log("gameWorld: ", gameWorld);
+            console.log("game: ", game);
+            console.log("playerCooldowns: ", playerCooldowns);
+            console.log("playerEnrolment: ", playerEnrolment);
         }
-    }, [clipboardStatus.message]);
+    }, [account]);
+
+    // get current component values
+    const playerGlobalStats = useComponentValue(GlobalPlayerStats, playerGlobalId);
+    const playerGameStats = useComponentValue(Player, playerGameId);
+    const gameWorld = useComponentValue(GameWorld, gameWorldId);
+    const game = useComponentValue(Game, gameId);
+    const playerCooldowns = useComponentValue(PlayerCooldowns, playerGameId);
+    const playerEnrolment = useComponentValue(PlayerEnrollment, playerGameId);
+
+    if (!account) {
+        return <Lobby />
+    }
 
     return (
         <>
-            <button onClick={() => create()}>
-                {isDeploying ? "deploying burner" : "create burner"}
-            </button>
-            {list().length > 0 && (
-                <button onClick={async () => await copyToClipboard()}>
-                    Save Burners to Clipboard
-                </button>
-            )}
-            <button onClick={handleRestoreBurners}>
-                Restore Burners from Clipboard
-            </button>
-            {clipboardStatus.message && (
-                <div className={clipboardStatus.isError ? "error" : "success"}>
-                    {clipboardStatus.message}
-                </div>
-            )}
-
-            <div className="card">
-                Select signer: {" "}
-                <select
-                    value={account ? account.address : ""}
-                    onChange={(e) => {select(e.target.value); window.location.replace(`?gameId=${activeGameId}`);}}
-                >
-                    {list().map((account, index) => {
-                        return (
-                            <option value={account.address} key={index}>
-                                {account.address}
-                            </option>
-                        );
-                    })}
-                </select>
-                <div>
-                    <button onClick={() => clear()}>Clear burners</button>
-                </div>
-            </div>
-
             <div className="card">
                 <div>
                     Total Game Worlds: {gameWorld ? `${gameWorld.nextGameId}` : "0"}
                 </div>
                 <div>
-                    Active Game World: 
+                    Active Game World:
                     <select
                         value={activeGameId}
-                        onChange={(e) => {window.location.replace(`?gameId=${e.target.value}`);}}
+                        onChange={(e) => { window.location.replace(`?gameId=${e.target.value}`); }}
                     >
                         {Array.from({ length: gameWorld ? Number(gameWorld.nextGameId) : 0 }, (_, index) => (
                             <option value={index} key={index}>
@@ -154,11 +101,11 @@ function App() {
                     {(playerEnrolment && playerEnrolment.enrolled) || (playerGameStats && playerGameStats.isGeneral) ?
                         <div>
                             {
-                                playerGameStats && playerGameStats.isGeneral ?
-                                <button onClick={() => unassignGeneral(account, activeGameId, 
-                                    playerGameStats && playerGameStats.address == game?.northGeneral ? 1 : 2
-                                )}>Resign as General</button> :
-                                <button onClick={() => unenroll(account, activeGameId)}>Unenroll from the Game</button>
+                                playerGameStats && playerGameStats.isGeneral && account ?
+                                    <button onClick={() => unassignGeneral(account, activeGameId,
+                                        playerGameStats && playerGameStats.address == game?.northGeneral ? 1 : 2
+                                    )}>Resign as General</button> :
+                                    <button onClick={() => unenroll(account, activeGameId)}>Unenroll from the Game</button>
                             }
                         </div> :
                         <div>
@@ -192,7 +139,7 @@ function App() {
                 <div>
                     South General: {game ? `${"0x" + game.southGeneral.toString(16)}` : "0"}
                 </div>
-                <br/>
+                <br />
                 <div>
                     Stage: {game ? `${GAME_STAGES[game.stage]}` : "Not Started"}
                 </div>
@@ -214,7 +161,7 @@ function App() {
                     Sharpened: {playerGameStats ? `${playerGameStats.sharpened}` : "Need to Spawn"}
                 </div>
                 <div>
-                    Gold: {playerGameStats? `${playerGameStats.gold}` : "Need to Spawn"}
+                    Gold: {playerGameStats ? `${playerGameStats.gold}` : "Need to Spawn"}
                 </div>
                 <div>
                     Total Strikes: {playerGameStats ? `${playerGameStats.totalStrikes}` : "Need to Enroll"}
@@ -223,39 +170,6 @@ function App() {
                     Total Damage: {playerGameStats ? `${playerGameStats.totalStrikeDamage}` : "Need to Enroll"}
                 </div>
             </div>
-
-            {/*<div className="card">
-                <div>
-                    <button
-                        onClick={() =>
-                            position && position.vec.y > 0
-                                ? move(account, Direction.Up)
-                                : console.log("Reach the borders of the world.")
-                        }
-                    >
-                        Move Up
-                    </button>
-                </div>
-                <div>
-                    <button
-                        onClick={() =>
-                            position && position.vec.x > 0
-                                ? move(account, Direction.Left)
-                                : console.log("Reach the borders of the world.")
-                        }
-                    >
-                        Move Left
-                    </button>
-                    <button onClick={() => move(account, Direction.Right)}>
-                        Move Right
-                    </button>
-                </div>
-                <div>
-                    <button onClick={() => move(account, Direction.Down)}>
-                        Move Down
-                    </button>
-                </div>
-            </div>*/}
         </>
     );
 }

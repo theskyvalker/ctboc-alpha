@@ -47,6 +47,10 @@ type State = {
   setDisplayButtonsSellsword: (value: boolean) => void;
   sellswordStyle: React.CSSProperties;
   setSellswordStyle: (value: React.CSSProperties) => void;
+  gameNames: { [key: string]: string };
+  setGameNames: (value: { [key: string]: string }) => void;
+  pinnedGames: number[];
+  setPinnedGames: (value: number[]) => void;
   walkBlueRef: React.MutableRefObject<any>;
   walkRedRef: React.MutableRefObject<any>;
   damageTextBlueRef: React.MutableRefObject<any>;
@@ -104,6 +108,10 @@ const useUIStore = create<State>((set) => ({
   setDisplayButtonsSellsword: (value) => set({ displayButtonsSellsword: value }),
   sellswordStyle: SELLSWORD_DEFAULT_STYLE,
   setSellswordStyle: (value) => set({ sellswordStyle: value }),
+  gameNames: {},
+  setGameNames: (value) => set({gameNames: value}),
+  pinnedGames: [],
+  setPinnedGames: (value) => set({pinnedGames: value}),
   walkBlueRef: createRef(),
   walkRedRef: createRef(),
   damageTextBlueRef: createRef(),

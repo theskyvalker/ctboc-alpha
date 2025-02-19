@@ -61,9 +61,23 @@ body {
     position: absolute;
     width: 27%;
     text-align: center;
+    color: white;
     top: 10%;
     height: 57%;
     padding: 0.5rem 0.5rem 0.5rem 0.5rem;
+}
+
+.right-banner-bottom-content {
+    position: absolute;
+    width: 29%;
+    text-align: center;
+    top: 71%;
+    height: 11%;
+    right: 4%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .container {
@@ -488,11 +502,56 @@ h2 {
 .connect-modal-dialog {
     position: absolute;
     left: 50%;
-    background-color: red;
-    width: 30%;
-    justify-content: center;
+    border: solid 2px chocolate;
+    background-color: black;
+    width: 20%;
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    gap: 2rem;
+    border-radius: 2rem;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+}
 
+.providers-grid {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.wallet-button-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    height: 100%;
+    width: 100%;
+    padding: 0.1rem;
+    place-content: end;
+}
+
+.right-header {
+    display: grid;
+    grid-auto-flow: column;
+    align-items: baseline;
+}
+
+.disconnect-modal {
+    position: absolute;
+    left: 50%;
+    border: solid 2px chocolate;
+    background-color: black;
+    width: 20%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    gap: 2rem;
+    border-radius: 2rem;
     top: 50%;
     transform: translateX(-50%) translateY(-50%);
 }
@@ -511,6 +570,14 @@ h2 {
     image-rendering: pixelated;
     align-items: center;
     color: black;
+}
+
+.connect-image-button {
+    background-image: url("/UI_Flat_Banner_01_Upward_green.png");
+}
+
+.disconnect-image-button {
+    background-image: url("/UI_Flat_Banner_01_Upward_gray.png");
 }
 
 .image-button:hover {
@@ -710,8 +777,8 @@ h2 {
     top: 80%;
     background-position: center;
     opacity: 0.85;
-    color: white;
-    background-image: url('/scroll_parchment_2.png');
+    color: black;
+    /*background-image: url('/scroll_parchment_2.png');*/
     image-rendering: pixelated;
     background-repeat: no-repeat;
     background-size: 100% 100%;

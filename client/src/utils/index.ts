@@ -1,5 +1,5 @@
 import { hexStringToUint8Array } from "@latticexyz/utils";
-import { DeclareTransactionReceiptResponse, RejectedTransactionReceiptResponse, RevertedTransactionReceiptResponse } from "starknet";
+import { DeclareTransactionReceiptResponse, GetTransactionReceiptResponse, RejectedTransactionReceiptResponse, RevertedTransactionReceiptResponse } from "starknet";
 import { twMerge } from "tailwind-merge";
 import { type ClassValue, clsx } from "clsx";
 
@@ -12,6 +12,61 @@ export enum Direction {
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
+}
+
+export function formatAddress(address: string) {
+    return `${address.substring(0, 4)}...${address.substring(address.length - 4)}`
+}
+
+/*export function formatStartTime(hexTime: string) {
+    const timestamp = parseInt(hexTime, 16);
+    return new Date(timestamp * 1000).toLocaleString();
+};*/
+
+export function formatStartTime(hexTime: string): string {
+    // Convert hex timestamp to a JavaScript Date object
+    const timestamp = parseInt(hexTime, 16);
+    const date = new Date(timestamp * 1000);
+
+    // Convert month number to month name
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthName = monthNames[date.getMonth()];
+
+    // Get day of the month
+    const day = date.getDate();
+
+    // Determine time of day based on hour
+    const hour = date.getHours();
+    let timeOfDay: string;
+    if (hour >= 5 && hour < 8) {
+        timeOfDay = "dawn";
+    } else if (hour >= 8 && hour < 12) {
+        timeOfDay = "morning";
+    } else if (hour === 12) {
+        timeOfDay = "midday";
+    } else if (hour >= 13 && hour < 17) {
+        timeOfDay = "afternoon";
+    } else if (hour >= 17 && hour < 20) {
+        timeOfDay = "evening";
+    } else if (hour >= 20 && hour <= 23) {
+        timeOfDay = "night";
+    } else {
+        timeOfDay = "twilight";
+    }
+
+    // Helper function to add ordinal suffix to the day
+    function ordinal(n: number): string {
+        if (n >= 11 && n <= 13) return `${n}th`;
+        const lastDigit = n % 10;
+        if (lastDigit === 1) return `${n}st`;
+        if (lastDigit === 2) return `${n}nd`;
+        if (lastDigit === 3) return `${n}rd`;
+        return `${n}th`;
+    }
+
+    // Format the date as "Day of Month at timeOfDay" with ordinal
+    const dayWithOrdinal = ordinal(day);
+    return `${dayWithOrdinal} of ${monthName} at ${timeOfDay}`;
 }
 
 export function updatePositionWithDirection(
@@ -57,15 +112,23 @@ export function tryBetterErrorMessage(receipt: any): string {
     return "";
 }
 
-export function processTxReceipt(receipt: DeclareTransactionReceiptResponse | RevertedTransactionReceiptResponse | RejectedTransactionReceiptResponse | undefined) {
-if (receipt?.status == "REJECTED") {
-    throw new Error("Transaction rejected");
-    } else if (receipt?.execution_status == "REVERTED" && receipt?.execution_status == "ACCEPTED_ON_L2") {
+export function processTxReceipt(receipt: any) {
+    console.log("We are inside processTxReceipt:", receipt);
+    if (!receipt) {
+        throw new Error("Failed to get transaction status.");
+    }
+    console.log(receipt.execution_status);
+    if (receipt.execution_status === "REJECTED" ) {
+        console.log("Error being shown");
+        throw new Error("Transaction rejected");
+    } else if (receipt.execution_status === "REVERTED") {
+        console.log("Error being shown");
         throw new Error(tryBetterErrorMessage(receipt) || "Transaction reverted");
-    } else if (receipt?.finality_status == "ACCEPTED_ON_L2" && receipt?.execution_status == "SUCCEEDED") {
-    return true;
+    } else if (receipt.execution_status === "SUCCEEDED") {
+        return true;
     } else {
-    throw new Error(receipt ? tryBetterErrorMessage(receipt) : "Transaction failed");
+        console.log("Error being shown");
+        throw new Error(receipt ? tryBetterErrorMessage(receipt) : "Transaction failed");
     }
 }
 

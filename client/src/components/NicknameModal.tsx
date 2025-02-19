@@ -16,7 +16,7 @@ const NicknameModal = () => {
     };
 
     const handleConfirm = () => {
-        console.log("Nickname confirmed:", newNickname);
+        console.log("Nickname confirmed in modal:", newNickname);
         setNickConfirmed(true);
         onCloseModal();
     };

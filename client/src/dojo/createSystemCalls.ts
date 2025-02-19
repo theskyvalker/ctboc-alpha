@@ -1,538 +1,351 @@
 import { SetupNetworkResult } from "./setupNetwork";
-import { Account, AccountInvocationItem, TransactionExecutionStatus, TransactionFinalityStatus } from "starknet";
-import { Entity, getComponentValue } from "@dojoengine/recs";
-import { uuid } from "@latticexyz/utils";
-import { ClientComponents } from "./createClientComponents";
-import { Direction, updatePositionWithDirection } from "../utils";
 import {
-    getEntityIdFromKeys,
-    getEvents,
-    setComponentsFromEvents,
-} from "@dojoengine/utils";
+    Account,
+    AccountInterface,
+    BigNumberish,
+    GetTransactionReceiptResponse,
+    InvokeFunctionResponse,
+    provider,
+} from "starknet";
+import { ClientComponents } from "./createClientComponents";
+import { getEvents } from "@dojoengine/utils";
+import { lordsAbi } from "../utils/ABI";
+import { Contract } from "starknet";
+
+import { World } from "@dojoengine/recs";
+import type { IWorld } from "./typescript/contracts.gen";
+import { sleep } from "@latticexyz/utils";
 
 export type SystemCalls = ReturnType<typeof createSystemCalls>;
 
-export function createSystemCalls(
-    { execute, contractComponents }: SetupNetworkResult,
-    { Game, GameWorld, GlobalPlayerStats, Player, PlayerCooldowns, PlayerEnrollment }: ClientComponents
-) {
-    const spawn = async (signer: Account, side: number) => {
-        /*const entityId = getEntityIdFromKeys([
-            BigInt(signer.address),
-        ]) as Entity;*/
+const {
+    VITE_PUBLIC_ACTIONS_ADDRESS,
+    VITE_PUBLIC_LORDS_ADDRESS,
+} = import.meta.env;
 
+const checkTokenBalance = async (
+    account: any,
+    feeInDecimal: number,
+    contractAddress: string,
+) => {
+    const abi = await lordsAbi();
+    const fee = BigInt(feeInDecimal * (10 ** 18));
+    const contract = new Contract(abi, contractAddress, account);
+    const balance = await contract.call("balanceOf", [account.address], {
+        parseResponse: true,
+        parseRequest: true,
+    });
+    if (BigInt(balance.toString()) < fee) {
+        throw new Error(
+            "Insufficient LORDS balance. Please acquire more LORDS and then attempt to join/start the game.",
+        );
+    }
+    return true;
+};
+
+async function getTransactionReceipt(signer: Account | AccountInterface, transaction_hash: string, tries: number = 0) {
+    if (transaction_hash) {
         try {
-            const { transaction_hash } = await execute(
-                signer,
-                "actions",
-                "spawn",
-                [side]
-            );
-
-            const receipt = await signer.waitForTransaction(transaction_hash, {
-                errorStates: [TransactionExecutionStatus.REJECTED, TransactionExecutionStatus.REVERTED],
-                successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2, TransactionExecutionStatus.SUCCEEDED],
-                retryInterval: 300
-            });
-
-            return receipt;
-
-            // const receipt = await signer.getTransactionReceipt(transaction_hash);
-
-            /*setComponentsFromEvents(
-                contractComponents,
-                getEvents(
-                    await signer.waitForTransaction(transaction_hash, {
-                        retryInterval: 100,
-                    })
-                )
-            );*/
-        } catch (e) {
-            console.log(e);
-            //Position.removeOverride(positionId);
-            //Moves.removeOverride(movesId);
-        } finally {
-            //Position.removeOverride(positionId);
-            //Moves.removeOverride(movesId);
-        }
-    };
-
-    const enroll = async (signer: Account, game: number) => {
-        /*const entityId = getEntityIdFromKeys([
-            BigInt(signer.address),
-        ]) as Entity;*/
-
-        try {
-            const { transaction_hash } = await execute(
-                signer,
-                "actions",
-                "enroll",
-                [game]
-            );
-
-            const receipt = await signer.waitForTransaction(transaction_hash, {
-                errorStates: [TransactionExecutionStatus.REJECTED, TransactionExecutionStatus.REVERTED],
-                successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2, TransactionExecutionStatus.SUCCEEDED],
-                retryInterval: 300
-            });
-
-            return receipt;
-
-            /*setComponentsFromEvents(
-                contractComponents,
-                getEvents(
-                    await signer.waitForTransaction(transaction_hash, {
-                        retryInterval: 100,
-                    })
-                )
-            );*/
-        } catch (e) {
-            console.log(e);
-            //Position.removeOverride(positionId);
-            //Moves.removeOverride(movesId);
-        } finally {
-            //Position.removeOverride(positionId);
-            //Moves.removeOverride(movesId);
-        }
-    };
-
-    const unenroll = async (signer: Account, game: number) => {
-        /*const entityId = getEntityIdFromKeys([
-            BigInt(signer.address),
-        ]) as Entity;*/
-
-        try {
-            const { transaction_hash } = await execute(
-                signer,
-                "actions",
-                "unenroll",
-                [game]
-            );
-
             const receipt = await signer.getTransactionReceipt(transaction_hash);
             return receipt;
-
-            /*setComponentsFromEvents(
-                contractComponents,
-                getEvents(
-                    await signer.waitForTransaction(transaction_hash, {
-                        retryInterval: 100,
-                    })
-                )
-            );*/
-        } catch (e) {
-            console.log(e);
-            //Position.removeOverride(positionId);
-            //Moves.removeOverride(movesId);
-        } finally {
-            //Position.removeOverride(positionId);
-            //Moves.removeOverride(movesId);
-        }
-    };
-
-    const assignGeneral = async (signer: Account, game: number, castle: number) => {
-        /*const entityId = getEntityIdFromKeys([
-            BigInt(signer.address),
-        ]) as Entity;*/
-
-        try {
-            const { transaction_hash } = await execute(
-                signer,
-                "actions",
-                "assignGeneral",
-                [game, castle]
-            );
-
-            const receipt = await signer.waitForTransaction(transaction_hash, {
-                errorStates: [TransactionExecutionStatus.REJECTED, TransactionExecutionStatus.REVERTED],
-                successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2, TransactionExecutionStatus.SUCCEEDED],
-                retryInterval: 300
-            });
-
-            return receipt;
-
-            /*setComponentsFromEvents(
-                contractComponents,
-                getEvents(
-                    await signer.waitForTransaction(transaction_hash, {
-                        retryInterval: 100,
-                    })
-                )
-            );*/
-        } catch (e) {
-            console.log(e);
-            //Position.removeOverride(positionId);
-            //Moves.removeOverride(movesId);
-        } finally {
-            //Position.removeOverride(positionId);
-            //Moves.removeOverride(movesId);
-        }
-    };
-
-    const unassignGeneral = async (signer: Account, game: number, castle: number) => {
-        /*const entityId = getEntityIdFromKeys([
-            BigInt(signer.address),
-        ]) as Entity;*/
-
-        try {
-            const { transaction_hash } = await execute(
-                signer,
-                "actions",
-                "unassignGeneral",
-                [game, castle]
-            );
-
-            const receipt = await signer.waitForTransaction(transaction_hash, {
-                errorStates: [TransactionExecutionStatus.REJECTED, TransactionExecutionStatus.REVERTED],
-                successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2, TransactionExecutionStatus.SUCCEEDED],
-                retryInterval: 300
-            });
-
-            return receipt;
-
-            /*setComponentsFromEvents(
-                contractComponents,
-                getEvents(
-                    await signer.waitForTransaction(transaction_hash, {
-                        retryInterval: 100,
-                    })
-                )
-            );*/
-        } catch (e) {
-            console.log(e);
-            //Position.removeOverride(positionId);
-            //Moves.removeOverride(movesId);
-        } finally {
-            //Position.removeOverride(positionId);
-            //Moves.removeOverride(movesId);
-        }
-    };
-
-    const fortify = async (signer: Account, game: number, castle: number, amount: number) => {
-        /*const entityId = getEntityIdFromKeys([
-            BigInt(signer.address),
-        ]) as Entity;*/
-
-        try {
-            console.log(signer.address, game, castle, amount);
-            const { transaction_hash } = await execute(
-                signer,
-                "actions",
-                "fortify",
-                [game, castle, amount]
-            );
-            
-            console.log(transaction_hash);
-
-            const receipt = await signer.waitForTransaction(transaction_hash, {
-                errorStates: [TransactionExecutionStatus.REJECTED, TransactionExecutionStatus.REVERTED],
-                successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2, TransactionExecutionStatus.SUCCEEDED],
-                retryInterval: 300
-            });
-
-            return receipt;
-
-            /*setComponentsFromEvents(
-                contractComponents,
-                getEvents(
-                    await signer.waitForTransaction(transaction_hash, {
-                        retryInterval: 100,
-                    })
-                )
-            );*/
-
-            return receipt;
-        } catch (e) {
-            console.log(e);
-            //Position.removeOverride(positionId);
-            //Moves.removeOverride(movesId);
-        } finally {
-            //Position.removeOverride(positionId);
-            //Moves.removeOverride(movesId);
-        }
-    };
-
-    const sharpen = async (signer: Account, game: number) => {
-        /*const entityId = getEntityIdFromKeys([
-            BigInt(signer.address),
-        ]) as Entity;*/
-
-        try {
-            const { transaction_hash } = await execute(
-                signer,
-                "actions",
-                "sharpen",
-                [game]
-            );
-
-            const receipt = await signer.waitForTransaction(transaction_hash, {
-                errorStates: [TransactionExecutionStatus.REJECTED, TransactionExecutionStatus.REVERTED],
-                successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2, TransactionExecutionStatus.SUCCEEDED],
-                retryInterval: 300
-            });
-
-            return receipt;
-
-            /*setComponentsFromEvents(
-                contractComponents,
-                getEvents(
-                    await signer.waitForTransaction(transaction_hash, {
-                        retryInterval: 100,
-                    })
-                )
-            );*/
-
-            return receipt;
-        } catch (e) {
-            console.log(e);
-            //Position.removeOverride(positionId);
-            //Moves.removeOverride(movesId);
-        } finally {
-            //Position.removeOverride(positionId);
-            //Moves.removeOverride(movesId);
-        }
-    };
-
-    const set_nickname = async (signer: Account, gameId: number, nickname: string) => {
-        console.log("Setting nickname: ", nickname);
-        try {
-            const { transaction_hash } = await execute(
-                signer,
-                "actions",
-                "set_nickname",
-                [gameId, nickname]
-            );
-
-            console.log("Set nickname tx: ", transaction_hash);
-
-            const receipt = await signer.waitForTransaction(transaction_hash, {
-                errorStates: [TransactionExecutionStatus.REJECTED, TransactionExecutionStatus.REVERTED],
-                successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2, TransactionExecutionStatus.SUCCEEDED],
-                retryInterval: 300
-            });
-
-            return receipt;
-
-            /*setComponentsFromEvents(
-                contractComponents,
-                getEvents(
-                    await signer.waitForTransaction(transaction_hash, {
-                        retryInterval: 100,
-                    }),
-                )
-            );*/
-
-            return receipt;
-        } catch (e) {
-            console.log(e);
+        } catch (error: any) {
+            console.log("Ran into an error in fetching tx receipt: ", error);
+            if (tries > 5) {
+                throw new Error("Failed to confirm transaction status.");
+            } else {
+                await sleep(1000);
+                console.log("Retrying fetching transaction receipt");
+                return getTransactionReceipt(signer, transaction_hash, tries + 1);
+            }
         }
     }
+}
 
-    const attack = async (signer: Account, game: number, castle: number) => {
-        /*const entityId = getEntityIdFromKeys([
-            BigInt(signer.address),
-        ]) as Entity;*/
+const checkApproval = async (account: any, feeInDecimal: number) => {
+    const abi = await lordsAbi();
+    const contract = new Contract(abi, VITE_PUBLIC_LORDS_ADDRESS, account);
+    const allowance = await contract.call("allowance", [
+        account.address,
+        VITE_PUBLIC_ACTIONS_ADDRESS,
+    ], { parseResponse: true, parseRequest: true });
+    const fee = BigInt(feeInDecimal * (10 ** 18));
 
+    return (BigInt(allowance.toString().replace("n", "")) >= fee);
+};
+
+const checkApprovalAndPerformAction = async (
+    signer: any,
+    feeInDecimal: number,
+    actionEntrypoint: string,
+    calldata: any[],
+) => {
+    const abi = await lordsAbi();
+    const contract = new Contract(abi, VITE_PUBLIC_LORDS_ADDRESS, signer);
+    const allowance = await contract.call("allowance", [
+        signer.address,
+        VITE_PUBLIC_ACTIONS_ADDRESS,
+    ], { parseResponse: true, parseRequest: true });
+    const fee = BigInt(feeInDecimal * (10 ** 18));
+
+    if (BigInt(allowance.toString().replace("n", "")) >= fee) {
+        const { transaction_hash } = await signer.execute({
+            contractAddress: VITE_PUBLIC_ACTIONS_ADDRESS,
+            entrypoint: actionEntrypoint,
+            calldata: calldata,
+        });
+
+        return transaction_hash;
+    } else {
+        const { transaction_hash } = await signer.execute([
+            {
+                contractAddress: VITE_PUBLIC_LORDS_ADDRESS,
+                entrypoint: "approve",
+                calldata: [
+                    VITE_PUBLIC_ACTIONS_ADDRESS,
+                    (100 * (10 ** 18)).toString(),
+                    0,
+                ],
+            },
+            {
+                contractAddress: VITE_PUBLIC_ACTIONS_ADDRESS,
+                entrypoint: actionEntrypoint,
+                calldata: calldata,
+            },
+        ]);
+
+        if (!transaction_hash) {
+            throw new Error("Error approving fee and performing game action");
+        }
+
+        return transaction_hash;
+    }
+};
+
+export function createSystemCalls(
+    { client }: { client: IWorld },
+    {
+        Game,
+        GameWorld,
+        GlobalPlayerStats,
+        Player,
+        PlayerCooldowns,
+        PlayerEnrollment,
+    }: ClientComponents,
+    world: World,
+) {
+    const spawn = async (
+        account: Account | AccountInterface,
+        side: BigNumberish,
+    ): Promise<GetTransactionReceiptResponse | undefined> => {
         try {
-            const {transaction_hash} = await execute(
-                signer,
-                "actions",
-                "attack",
-                [game, castle]
-            );
-
-            console.log(transaction_hash);
-
-            const events = getEvents(
-                await signer.waitForTransaction(transaction_hash, {
-                    retryInterval: 100,
-                })
-            );
-
-            console.log(events);
-
-            const receipt = await signer.waitForTransaction(transaction_hash, {
-                errorStates: [TransactionExecutionStatus.REJECTED, TransactionExecutionStatus.REVERTED],
-                successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2, TransactionExecutionStatus.SUCCEEDED],
-                retryInterval: 300
-            });
-
-            return receipt;
-
-            /*setComponentsFromEvents(
-                contractComponents,
-                events
-            );*/
-
-            return receipt;
+            await checkTokenBalance(account, 100, VITE_PUBLIC_LORDS_ADDRESS); // will throw an error if balance < 100 LORDS
+            const transaction_hash = await checkApprovalAndPerformAction(account, 100, "spawn", [side]);
+            return transaction_hash ? getTransactionReceipt(account, transaction_hash) : undefined;
         } catch (e) {
-            console.log("error occured");
             console.log(e);
-            //Position.removeOverride(positionId);
-            //Moves.removeOverride(movesId);
-        } finally {
-            //Position.removeOverride(positionId);
-            //Moves.removeOverride(movesId);
         }
     };
 
-    const pay = async (signer: Account, game: number, recipient: string, amount: number) => {
-        /*const entityId = getEntityIdFromKeys([
-            BigInt(signer.address),
-        ]) as Entity;*/
-
+    const enroll = async (signer: Account | AccountInterface, game: number): Promise<GetTransactionReceiptResponse | undefined> => {
         try {
-            const { transaction_hash } = await execute(
-                signer,
-                "actions",
-                "pay",
-                [game, recipient, amount]
-            );
-
-            const receipt = await signer.waitForTransaction(transaction_hash, {
-                errorStates: [TransactionExecutionStatus.REJECTED, TransactionExecutionStatus.REVERTED],
-                successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2, TransactionExecutionStatus.SUCCEEDED],
-                retryInterval: 300
-            });
-
-            return receipt;
-
-            /*setComponentsFromEvents(
-                contractComponents,
-                getEvents(
-                    await signer.waitForTransaction(transaction_hash, {
-                        retryInterval: 100,
-                    })
-                )
-            );*/
+            await checkTokenBalance(signer, 10, VITE_PUBLIC_LORDS_ADDRESS); // will throw an error if balance < 10 LORDS
+            const transaction_hash = await checkApprovalAndPerformAction(signer, 10, "enroll", [game]);
+            return transaction_hash ? getTransactionReceipt(signer, transaction_hash) : undefined;
         } catch (e) {
             console.log(e);
-            //Position.removeOverride(positionId);
-            //Moves.removeOverride(movesId);
-        } finally {
-            //Position.removeOverride(positionId);
-            //Moves.removeOverride(movesId);
         }
     };
 
-    const buyrank = async (signer: Account, game: number, ranks: number) => {
-        /*const entityId = getEntityIdFromKeys([
-            BigInt(signer.address),
-        ]) as Entity;*/
-
+    const unenroll = async (
+        signer: Account | AccountInterface,
+        game: number,
+    ): Promise<GetTransactionReceiptResponse | undefined> => {
         try {
-            const { transaction_hash } = await execute(
-                signer,
-                "actions",
-                "buyrank",
-                [game, ranks]
-            );
+            // If you also need to check token balances or approvals, do so here
+            // e.g. await checkTokenBalance(signer, 10, VITE_PUBLIC_LORDS_ADDRESS);
 
-            const receipt = await signer.waitForTransaction(transaction_hash, {
-                errorStates: [TransactionExecutionStatus.REJECTED, TransactionExecutionStatus.REVERTED],
-                successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2, TransactionExecutionStatus.SUCCEEDED],
-                retryInterval: 300
-            });
-
-            return receipt;
-
-            /*setComponentsFromEvents(
-                contractComponents,
-                getEvents(
-                    await signer.waitForTransaction(transaction_hash, {
-                        retryInterval: 100,
-                    })
-                )
-            );*/
+            const txResult = await client.actions.unenroll(signer, game);
+            return txResult ? getTransactionReceipt(signer, txResult.transaction_hash) : undefined;
         } catch (e) {
-            console.log(e);   
+            console.log(e);
         }
     };
 
-    const changegamestage = async (signer: Account, game: number, stage: number) => {
+    const assignGeneral = async (
+        signer: Account | AccountInterface,
+        game: number,
+        castle: number,
+    ): Promise<GetTransactionReceiptResponse | undefined> => {
         try {
-            const { transaction_hash } = await execute(
-                signer,
-                "actions",
-                "change_game_stage",
-                [game, stage]
-            );
-
-            console.log("Game stage change tx: ", transaction_hash);
-
-            const receipt = await signer.waitForTransaction(transaction_hash, {
-                errorStates: [TransactionExecutionStatus.REJECTED, TransactionExecutionStatus.REVERTED],
-                successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2, TransactionExecutionStatus.SUCCEEDED],
-                retryInterval: 300
-            });
-
-            console.log("Game stage change receipt: ", receipt);
-
-            return receipt;
-
-            /*setComponentsFromEvents(
-                contractComponents,
-                getEvents(
-                    await signer.waitForTransaction(transaction_hash, {
-                        retryInterval: 100,
-                    }),
-                )
-            );*/
+            await checkTokenBalance(signer, 100, VITE_PUBLIC_LORDS_ADDRESS);
+            const transaction_hash = await checkApprovalAndPerformAction(signer, 100, "assignGeneral", [game, castle]);
+            return transaction_hash ? getTransactionReceipt(signer, transaction_hash) : undefined;
         } catch (e) {
             console.log(e);
         }
-    }
+    };
 
-    const devchangegamestage = async (signer: Account, game: number, stage: number) => {
+    const unassignGeneral = async (
+        signer: Account | AccountInterface,
+        game: number,
+        castle: number,
+    ): Promise<GetTransactionReceiptResponse | undefined> => {
         try {
-            const { transaction_hash } = await execute(
+            const txResult = await client.actions.unassignGeneral(
                 signer,
-                "actions",
-                "dev_change_game_stage",
-                [game, stage]
+                game,
+                castle,
             );
-
-            const receipt = await signer.waitForTransaction(transaction_hash, {
-                errorStates: [TransactionExecutionStatus.REJECTED, TransactionExecutionStatus.REVERTED],
-                successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2, TransactionExecutionStatus.SUCCEEDED],
-                retryInterval: 300
-            });
-
-            return receipt;
-
-            /*setComponentsFromEvents(
-                contractComponents,
-                getEvents(
-                    await signer.waitForTransaction(transaction_hash, {
-                        retryInterval: 100,
-                    }),
-                )
-            );*/
+            return txResult ? getTransactionReceipt(signer, txResult.transaction_hash) : undefined;
         } catch (e) {
             console.log(e);
         }
-    }
+    };
 
-    const get_nickname = async (signer: Account, gameId: number, address: string) => {
+    const fortify = async (
+        signer: Account | AccountInterface,
+        game: number,
+        castle: number,
+        amount: number,
+    ): Promise<GetTransactionReceiptResponse | undefined> => {
         try {
-            const { transaction_hash } = await execute(
+            const txResult = await client.actions.fortify(
                 signer,
-                "actions",
-                "get_nickname",
-                [gameId, address]
+                game,
+                castle,
+                amount,
             );
+            return txResult ? getTransactionReceipt(signer, txResult.transaction_hash) : undefined;
+        } catch (e) {
+            console.log(e);
+        }
+    };
 
-            const receipt = await signer.waitForTransaction(transaction_hash, {
-                errorStates: [TransactionExecutionStatus.REJECTED, TransactionExecutionStatus.REVERTED],
-                successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2, TransactionExecutionStatus.SUCCEEDED],
-                retryInterval: 300
-            });
+    const sharpen = async (
+        signer: Account | AccountInterface,
+        game: number,
+    ): Promise<GetTransactionReceiptResponse | undefined> => {
+        try {
+            const txResult = await client.actions.sharpen(signer, game);
+            return txResult ? getTransactionReceipt(signer, txResult.transaction_hash) : undefined;
+        } catch (e) {
+            console.log(e);
+        }
+    };
 
+    const set_nickname = async (
+        signer: Account | AccountInterface,
+        gameId: number,
+        nickname: string,
+    ): Promise<InvokeFunctionResponse | undefined> => {
+        try {
+            const receipt = await client.actions.setNickname(
+                signer,
+                gameId,
+                nickname,
+            );
             return receipt;
         } catch (e) {
             console.log(e);
         }
-    }
+    };
+
+    const attack = async (
+        signer: Account | AccountInterface,
+        game: number,
+        castle: number,
+    ): Promise<GetTransactionReceiptResponse | undefined> => {
+        try {
+            const txResult = await client.actions.attack(signer, game, castle);
+            return txResult ? getTransactionReceipt(signer, txResult.transaction_hash) : undefined;
+        } catch (e) {
+            console.log(e);
+        }
+    };
+
+    const pay = async (
+        signer: Account | AccountInterface,
+        game: number,
+        recipient: string,
+        amount: number,
+    ): Promise<GetTransactionReceiptResponse | undefined> => {
+        try {
+            const txResult = await client.actions.pay(
+                signer,
+                game,
+                recipient,
+                amount,
+            );
+            console.log("payment transaction hash: ", txResult);
+            return txResult ? getTransactionReceipt(signer, txResult.transaction_hash) : undefined;
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const buyrank = async (
+        signer: Account | AccountInterface,
+        game: number,
+        ranks: number,
+    ): Promise<InvokeFunctionResponse | undefined> => {
+        try {
+            const receipt = await client.actions.buyrank(signer, game, ranks);
+            return receipt;
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const changegamestage = async (
+        signer: Account | AccountInterface,
+        game: number,
+        stage: number,
+    ): Promise<GetTransactionReceiptResponse | undefined> => {
+        try {
+            const txResult = await client.actions.changeGameStage(
+                signer,
+                game,
+                stage,
+            );
+            return txResult ? getTransactionReceipt(signer, txResult.transaction_hash) : undefined;
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const devchangegamestage = async (
+        signer: Account | AccountInterface,
+        game: number,
+        stage: number,
+    ): Promise<InvokeFunctionResponse | undefined> => {
+        try {
+            const receipt = await client.actions.devChangeGameStage(
+                signer,
+                game,
+                stage,
+            );
+            return receipt;
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const get_nickname = async (
+        signer: Account | AccountInterface,
+        gameId: number,
+        address: string,
+    ): Promise<string | undefined> => {
+        try {
+            // Perform a read-only call to get the nickname
+            const nickname = await client.actions.getNickname(
+                signer, gameId, address
+            )
+            return nickname;
+        } catch (e) {
+            console.error(e);
+            throw new Error("Error fetching nickname");
+        }
+    };
 
     return {
         spawn,
@@ -548,6 +361,6 @@ export function createSystemCalls(
         changegamestage,
         devchangegamestage,
         set_nickname,
-        get_nickname
+        get_nickname,
     };
 }

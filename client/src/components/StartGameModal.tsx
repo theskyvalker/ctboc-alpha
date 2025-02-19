@@ -10,6 +10,7 @@ interface StartGameModalProps {
 }
 
 const StartGameModal: React.FC<StartGameModalProps> = ({ open, onClose, handleStartAsNorthGeneral, handleStartAsSouthGeneral }) => {
+
   return (
     <Modal open={open} onClose={onClose} classNames={{root: "main-modal", modal:"main-modal-bg"}} styles={{modal:{backgroundImage:"url('/pixelated_bg_menu.jpg')", backgroundSize:"cover"}}} center>
       <h2>Start a Game as:</h2>

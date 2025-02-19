@@ -1,21 +1,30 @@
-import Button from "../Button";
-import { useUiSounds } from "../../hooks/useUiSound";
-import useUIStore from "../../hooks/useUIStore";
-import React from "react";
-import { ToastContainer, toast } from 'react-toastify';
-import "react-toastify/dist/ReactToastify.css";
-import { AttackResult } from "../../utils/types";
-import { DEFAULT_TOAST_STYLE, SELLSWORD_DEFAULT_STYLE } from "../../utils/constants";
+import React, { forwardRef, useImperativeHandle, useRef } from 'react';
+import ActionButton from '../ActionButton';
+import { useUiSounds } from '../../hooks/useUiSound';
+import useUIStore from '../../hooks/useUIStore';
+import { toast } from 'react-toastify';
+import { AttackResult } from '../../utils/types';
+import { DEFAULT_TOAST_STYLE, DEFAULT_TOAST_STYLE_SUBSET, SELLSWORD_DEFAULT_STYLE } from '../../utils/constants';
+import { Pointer } from 'lucide-react';
 
 interface CastleButtonsProps {
-    castle: "red" | "blue";
+    castle: 'red' | 'blue';
     isGeneral: boolean | undefined;
     gold: number;
     attack: () => Promise<AttackResult>;
     fortify: () => Promise<boolean>;
+    focusedButtonIndex: number;
 }
 
-export const CastleButtons: React.FC<CastleButtonsProps> = ({ castle, isGeneral, gold, attack, fortify }) => {
+export const CastleButtons = forwardRef((props: CastleButtonsProps, ref) => {
+    const {
+        castle,
+        isGeneral,
+        gold,
+        attack,
+        fortify,
+        focusedButtonIndex,
+    } = props;
 
     const {
         setDisplayButtonsCastle,
@@ -41,13 +50,13 @@ export const CastleButtons: React.FC<CastleButtonsProps> = ({ castle, isGeneral,
         setRedHP,
         setBlueHP,
         redCastleRef,
-        blueCastleRef
+        blueCastleRef,
     } = useUIStore();
 
-    const walkSound = useUiSounds("run");
-    const swordSound = useUiSounds("sword");
-    const impactSound = useUiSounds("damaged");
-    const fortifySound = useUiSounds("powerUp");
+    const walkSound = useUiSounds('run');
+    const swordSound = useUiSounds('sword');
+    const impactSound = useUiSounds('damaged');
+    const fortifySound = useUiSounds('powerUp');
 
     const updateFortifyAmount = (event: React.ChangeEvent<HTMLInputElement>) => {
         setFortifyAmount(parseInt(event.target.value));
@@ -56,49 +65,25 @@ export const CastleButtons: React.FC<CastleButtonsProps> = ({ castle, isGeneral,
     const resetSellsword = () => {
         if (ongoingAnimation || showLogoMenu) return;
         setSellswordStyle(SELLSWORD_DEFAULT_STYLE);
-    }
+    };
 
     const toggleFortifyMenu = (event?: React.MouseEvent | React.PointerEvent) => {
         if (event) {
-          event?.stopPropagation();
+            event.stopPropagation();
         }
         if (isGeneral) {
-          setShowFortifyMenu(!showFortifyMenu);
+            setShowFortifyMenu(!showFortifyMenu);
         } else {
-          toast.warning("Must be a general to fortify a castle", {
-            position: "bottom-center",
-            autoClose: 3000,
-            hideProgressBar: true,
-            style: {
-              backgroundColor: "transparent",
-              border: "none",
-              boxShadow: "none",
-              color: "white",
-              height: "173px",
-              width: "274px",
-              textAlign: "center"
-            }
-          });
+            toast.warning('Must be a general to fortify a castle', DEFAULT_TOAST_STYLE.warning);
         }
-      }
+    };
 
-    const handleAttack = async (event: React.PointerEvent) => {
-        event.stopPropagation();
+    const handleAttack = async (event?: React.PointerEvent) => {
+        if (event) event.stopPropagation();
         console.log("attack");
         setDisplayButtonsCastle(false);
         setOngoingAnimation(true);
-        const toastId = toast.loading('Preparing to charge...', {
-            position: "bottom-center",
-            style: {
-                backgroundColor: "transparent",
-                border: "none",
-                boxShadow: "none",
-                color: "white",
-                height: "173px",
-                width: "274px",
-                textAlign: "center",
-            },
-            autoClose: false});
+        const toastId = toast.loading('Preparing to charge...', DEFAULT_TOAST_STYLE.info);
         var damage = 0;
         try {
             const result = await attack();
@@ -108,13 +93,7 @@ export const CastleButtons: React.FC<CastleButtonsProps> = ({ castle, isGeneral,
             toast.dismiss(toastId);
             toast.success('Attack!!!', {
                 autoClose: 2000,
-                style: {
-                    backgroundColor: "transparent", border: "none", boxShadow: "none",
-                    height: "173px",
-                    width: "274px",
-                    color: "white",
-                    textAlign: "center",
-                },
+                style: DEFAULT_TOAST_STYLE_SUBSET.success,
                 position: "bottom-center",
                 icon: () => "⚔️",
                 bodyClassName: "toast-success",
@@ -125,7 +104,7 @@ export const CastleButtons: React.FC<CastleButtonsProps> = ({ castle, isGeneral,
         } catch (reason: any) {
             console.log(reason);
             toast.dismiss(toastId);
-            toast.error(reason.toString().replace("Error: ",""), DEFAULT_TOAST_STYLE);
+            toast.error(reason.toString().replace("Error: ", ""), DEFAULT_TOAST_STYLE.error);
         }
         if (!damage) {
             console.log("damage not non zero");
@@ -133,12 +112,12 @@ export const CastleButtons: React.FC<CastleButtonsProps> = ({ castle, isGeneral,
             return;
         }
         console.log("attack 2");
-        setSellswordStyle({display: "none"});
+        setSellswordStyle({ display: "none" });
         if (castle === "blue") {
             walkBlueRef.current.style.animation = 'spriteAnim 1.5s steps(8) infinite, moveAnimBlue 4s linear forwards';
             walkBlueRef.current.style.display = 'block';
             walkSound.play();
-            walkBlueRef.current.addEventListener('animationend', function(e: any) {
+            walkBlueRef.current.addEventListener('animationend', function (e: any) {
                 if (e.animationName === 'moveAnimBlue') {
                     walkSound.stop();
                     walkBlueRef.current.style.display = 'none';
@@ -147,7 +126,7 @@ export const CastleButtons: React.FC<CastleButtonsProps> = ({ castle, isGeneral,
                     setTimeout(() => {
                         swordSound.play();
                     }, 1200);
-                    attackBlueRef.current.addEventListener('animationend', function(e: any) {
+                    attackBlueRef.current.addEventListener('animationend', function (e: any) {
                         if (e.animationName === 'spriteAnimAttack') {
                             impactSound.play();
                             damageTextBlueRef.current.style.display = 'block';
@@ -160,7 +139,7 @@ export const CastleButtons: React.FC<CastleButtonsProps> = ({ castle, isGeneral,
                             blueCastleRef.current.style.animation = '';
                         }
                     });
-                    damageTextBlueRef.current.addEventListener('animationend', function(e: any) {
+                    damageTextBlueRef.current.addEventListener('animationend', function (e: any) {
                         if (e.animationName === 'up') {
                             damageTextBlueRef.current.style.display = 'none';
                         }
@@ -170,7 +149,7 @@ export const CastleButtons: React.FC<CastleButtonsProps> = ({ castle, isGeneral,
         } else {
             walkRedRef.current.style.animation = 'spriteAnim 1.5s steps(8) infinite, moveAnimRed 4s linear forwards';
             walkRedRef.current.style.display = 'block';
-            walkRedRef.current.addEventListener('animationend', function(e: any) {
+            walkRedRef.current.addEventListener('animationend', function (e: any) {
                 if (e.animationName === 'moveAnimRed') {
                     walkRedRef.current.style.display = 'none';
                     attackRedRef.current.style.display = 'block';
@@ -178,7 +157,7 @@ export const CastleButtons: React.FC<CastleButtonsProps> = ({ castle, isGeneral,
                     setTimeout(() => {
                         swordSound.play();
                     }, 1200);
-                    attackRedRef.current.addEventListener('animationend', function(e: any) {
+                    attackRedRef.current.addEventListener('animationend', function (e: any) {
                         if (e.animationName === 'spriteAnimAttack') {
                             impactSound.play();
                             damageTextRedRef.current.style.display = 'block';
@@ -191,7 +170,7 @@ export const CastleButtons: React.FC<CastleButtonsProps> = ({ castle, isGeneral,
                             redCastleRef.current.style.animation = '';
                         }
                     });
-                    damageTextRedRef.current.addEventListener('animationend', function(e: any) {
+                    damageTextRedRef.current.addEventListener('animationend', function (e: any) {
                         if (e.animationName === 'up') {
                             damageTextRedRef.current.style.display = 'none';
                         }
@@ -201,23 +180,11 @@ export const CastleButtons: React.FC<CastleButtonsProps> = ({ castle, isGeneral,
         }
     };
 
-    const handleFortify = async (event: React.PointerEvent | React.MouseEvent) => {
-        event.stopPropagation();
+    const handleFortify = async (event?: React.PointerEvent | React.MouseEvent) => {
+        if (event) event.stopPropagation();
         console.log("fortify");
         const castleRef = castle === "blue" ? blueCastleRef : redCastleRef;
-        const toastId = toast.loading(`Fortifying ${castle} castle...`, {
-            position: "bottom-center",
-            style: {
-                backgroundColor: "transparent",
-                border: "none",
-                boxShadow: "none",
-                color: "white",
-                height: "173px",
-                width: "274px",
-                textAlign: "center",
-            },
-            autoClose: false
-        });
+        const toastId = toast.loading(`Fortifying ${castle} castle...`, DEFAULT_TOAST_STYLE.info);
 
         try {
             const result = await fortify();
@@ -227,7 +194,7 @@ export const CastleButtons: React.FC<CastleButtonsProps> = ({ castle, isGeneral,
             console.log(result);
 
             toast.dismiss(toastId);
-            toast.success(`Fortified ${castle} castle by ${fortifyAmount * 2} HP`, DEFAULT_TOAST_STYLE);
+            toast.success(`Fortified ${castle} castle by ${fortifyAmount * 2} HP`, DEFAULT_TOAST_STYLE.success);
 
             // Success animation with color change
             const scaleIncrements = [1.05, 1, 1.05, 1, 1.05, 1]; // Scaling up and back down
@@ -247,15 +214,59 @@ export const CastleButtons: React.FC<CastleButtonsProps> = ({ castle, isGeneral,
         } catch (error: any) {
             console.log(error);
             toast.dismiss(toastId);
-            toast.error(`Failed to fortify ${castle} castle: ${error.toString().replace("Error: ", "")}`, DEFAULT_TOAST_STYLE);
+            toast.error(`Failed to fortify ${castle} castle: ${error.toString().replace("Error: ", "")}`, DEFAULT_TOAST_STYLE.error);
         }
-    };     
+    };
+
+    const buttons = [
+        {
+            id: `attack-${castle}`,
+            imgUrl: '/attack.svg',
+            onClick: handleAttack,
+            style: { left: '45%', top: '50%' },
+        },
+        {
+            id: `fortify-${castle}`,
+            imgUrl: '/fortify.svg',
+            onClick: toggleFortifyMenu,
+            style: { left: '45%', top: '58%' },
+        },
+    ];
+
+    // Create refs for each button
+    const buttonRefs = useRef(buttons.map(() => React.createRef<any>())).current;
+
+    useImperativeHandle(ref, () => ({
+        invokeAction: () => {
+            const button = buttons[focusedButtonIndex];
+            if (button && button.onClick) {
+                // Trigger the pressed state
+                if (buttonRefs[focusedButtonIndex].current) {
+                    buttonRefs[focusedButtonIndex].current.triggerPressedAnimation();
+                }
+                button.onClick();
+            }
+        },
+    }));
 
     return (
         <>
-            <Button id={`attack-${{castle}}`} imgUrl='/attack.svg' onClick={handleAttack} style={{left: "45%", top: "35%"}} />
-            <Button id={`fortify-${{castle}}`} imgUrl='/fortify.svg' onClick={toggleFortifyMenu} style={{left: "45%", top: "45%"}} />
-            
+            {/*<Button id={`attack-${{castle}}`} imgUrl='/attack.svg' onClick={handleAttack} style={{left: "45%", top: "50%"}} />
+            <Button id={`fortify-${{castle}}`} imgUrl='/fortify.svg' onClick={toggleFortifyMenu} style={{left: "45%", top: "58%"}} />*/}
+
+            {buttons.map((button, index) => (
+                <ActionButton
+                    key={button.id}
+                    //@ts-ignore
+                    ref={buttonRefs[index]}
+                    id={button.id}
+                    imgUrl={button.imgUrl}
+                    onClick={button.onClick}
+                    style={button.style}
+                    className={focusedButtonIndex === index ? 'focused-button' : ''}
+                />
+            ))}
+
             {showFortifyMenu && (
                 <div id="fortify-menu" onClick={(event) => event.stopPropagation()}>
                     <p style={{ color: 'Black' }}>
@@ -298,4 +309,4 @@ export const CastleButtons: React.FC<CastleButtonsProps> = ({ castle, isGeneral,
             )}
         </>
     );
-}
+});

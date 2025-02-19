@@ -1,11 +1,14 @@
 import { overridableComponent } from "@dojoengine/recs";
-import { SetupNetworkResult } from "./setupNetwork";
+
+import { ContractComponents } from "./typescript/models.gen";
 
 export type ClientComponents = ReturnType<typeof createClientComponents>;
 
 export function createClientComponents({
     contractComponents,
-}: SetupNetworkResult) {
+}: {
+    contractComponents: ContractComponents;
+}) {
     return {
         ...contractComponents
     };

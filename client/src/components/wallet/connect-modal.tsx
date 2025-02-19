@@ -5,7 +5,6 @@ import {
   DialogHeader,
   DialogTrigger,
 } from "../ui/dialog";
-import { Button } from "../ui/button";
 
 export default function ConnectModal() {
   const { connect, connectors } = useConnect();
@@ -13,28 +12,30 @@ export default function ConnectModal() {
     <div className="w-full flex justify-end">
       <Dialog>
         <DialogTrigger asChild>
-          <button className="image-button">CONNECT WALLET</button>
+          <div className="image-button connect-image-button">CONNECT WALLET</div>
         </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>Connect Wallet</DialogHeader>
-          <div className="flex flex-col gap-4 items-center connect-modal-dialog">
+        <DialogContent className="connect-modal-dialog">
+          <DialogHeader>CONNECT WALLET</DialogHeader>
+          <div className="providers-grid">
             {connectors.map((connector: Connector) => (
-            <Button
+            <button
                 key={connector.id}
                 onClick={() => {console.log(connector); connect({ connector });}}
                 disabled={!connector.available()}
             >
                 {connector.name === "Braavos" || connector.name === "Argent X" ? (
                     <>
-                        <img src={connector.icon.light} className="h-10 w-10 mr-4" alt={connector.name} />
-                        {connector.name}
+                        <div className="wallet-button-container">
+                          <img src={connector.icon as string} alt={connector.name} className="wallet-icon-image" />
+                          {connector.name}
+                        </div>
                     </>
                 ) : (
                     connector.name
                 )}
-            </Button>
+            </button>
             ))}
-          </div>
+            </div>
         </DialogContent>
       </Dialog>
     </div>

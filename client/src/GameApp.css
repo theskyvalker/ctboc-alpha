@@ -87,6 +87,7 @@ body {
     background-repeat: no-repeat;
     background-size: 100% 100%;
     border-radius: 20px;
+    z-index: 999;
     box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.75);
 }
 #profile-menu {
@@ -114,6 +115,12 @@ body {
 }
 #profile-menu > p {
     margin-block: 0 0;
+}
+.idDisplay {
+    position: absolute;
+    color: black;
+    left: 50%;
+    transform: translateX(-50%);
 }
 .pay-modal-inp-grp {
     display: flex;
@@ -264,18 +271,20 @@ body {
     height: 13%;
 }*/
 #blue-banner {
-    top: 61%;
     right: 30.25%;
+}
+#red-banner {
+    left: 30.25%;
+}
+.banner-image {
+    cursor: pointer;
+    top: 61%;
     width: 15%;
     height: 15%;
     image-rendering: pixelated;
 }
-#red-banner {
-    top: 61%;
-    left: 30.25%;
-    width: 15%;
-    height: 15%;
-    image-rendering: pixelated;
+.banner-image:hover {
+    scale: 1.1;
 }
 /*#red-banner {
     top: 64%;
@@ -459,12 +468,30 @@ body {
     top: 80%;
     background-position: center;
     opacity: 0.85;
-    color: white;
-    background-image: url('/scroll_parchment_2.png');
+    color: black;
+    /*background-image: url('/scroll_parchment_2.png');*/
     image-rendering: pixelated;
     background-repeat: no-repeat;
     background-size: 100% 100%;
     margin-left: 20px;
+}
+
+#banner-modal {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    width: 30%;
+    height: 40%;
+    max-height: 40%;
+    color: black;
+    text-align: center;
+    background-image: url('/pixelated_bg_menu_2.png');
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    border-radius: 20px;
+    padding: 1rem 1rem 1rem 1rem;
+    box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.75);
 }
 
 @keyframes flashAnim {
@@ -502,6 +529,15 @@ body {
     animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
     animation-iteration-count: 1;
     transform-origin: center;
+}
+
+#help-button {
+    height: 3%;
+    width: 2.05%;
+    left: 58%;
+    top: 5%;
+    animation: breathing 2s infinite;
+    cursor: pointer;
 }
 
 @keyframes up {

@@ -27,7 +27,7 @@ export function Provider({ children }: { children: React.ReactNode }) {
   return (
     <StarknetConfig
       chains={[
-        ...(VITE_PUBLIC_IS_TESTNET === "true" ? [sepolia] : [mainnet])]}
+        ...(VITE_PUBLIC_IS_TESTNET === "true" ? [sepolia, mainnet] : [sepolia, mainnet])]}
       provider={blastProvider({apiKey: VITE_PUBLIC_BLAST_API_KEY || ""})}
       autoConnect={true}
       queryClient={queryClient}

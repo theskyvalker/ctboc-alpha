@@ -4,18 +4,12 @@
 	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 153 153"
 	 style="enable-background:new 0 0 153 153;" xml:space="preserve">
 <style type="text/css">
-	.st0{fill:#3E0F00;}
 	.st1{fill:#FFFFFF;}
-	.st2{fill:#FFA4A4;}
-	.st3{fill:#B00000;}
-	.st4{fill:#D20000;}
+	.st2{fill:#FFA4A4;} 
 	.st5{fill:#601B06;}
-	.st6{fill:#EB7E5D;}
 	.st7{fill:#FFE2B6;}
 	.st8{fill:#FFEEDB;}
-	.st9{fill:#FBB876;}
 	.st10{fill:#FBDCB9;}
-	.st11{fill:#A55B4D;}
 	.st12{fill:#C6674A;}
 	.st13{fill:#0D1233;}
 	.st14{fill:#9F4F36;}
@@ -29,6 +23,13 @@
 	.st22{fill:#A49D9D;}
 	.st23{fill:#E8AE60;}
 	.st24{fill:#FECB88;}
+	<!-- majority of the red palette comes from these styles below -->
+	.st11{fill:#A55B4D;}
+	.st9{fill:#FBB876;}
+	.st6{fill:#EB7E5D;}
+	.st3{fill:#B00000;} 
+	.st4{fill:#D20000;}
+	.st0{fill:#3E0F00;}
 </style>
 <rect x="59" y="1" class="st0" width="1" height="1"/>
 <rect x="60" y="1" class="st0" width="1" height="1"/>

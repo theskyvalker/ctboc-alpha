@@ -1,31 +1,72 @@
+import { DojoConfig, DojoProvider } from "@dojoengine/core";
+import { getSyncEntities, getSyncEvents } from "@dojoengine/state";
+import * as torii from "@dojoengine/torii-client";
+import { Account, ArraySignatureType } from "starknet";
+
 import { createClientComponents } from "./createClientComponents";
 import { createSystemCalls } from "./createSystemCalls";
-import { setupNetwork } from "./setupNetwork";
-import { getSyncEntities } from "@dojoengine/state";
+import { setupWorld } from "./typescript/contracts.gen";
+import { defineContractComponents } from "./contractComponents";
+import { world } from "./world";
 
 export type SetupResult = Awaited<ReturnType<typeof setup>>;
 
-/**
- * Sets up the necessary components and network utilities.
- *
- * @returns An object containing network configurations, client components, and system calls.
- */
-export async function setup() {
-    // Initialize the network configuration.
-    const network = await setupNetwork();
+export async function setup({ ...config }: DojoConfig) {
+    // Initialize Torii client for interacting with the Dojo network
+    const toriiClient = await torii.createClient({
+        rpcUrl: config.rpcUrl,
+        toriiUrl: config.toriiUrl,
+        relayUrl: "",
+        worldAddress: config.manifest.world.address || "",
+    });
 
-    // Create client components based on the network setup.
-    const components = createClientComponents(network);
+    // Define contract components based on the world configuration
+    const contractComponents = defineContractComponents(world);
 
-    // fetch all existing entities from torii
-    await getSyncEntities(
-        network.toriiClient,
-        network.contractComponents as any
+    const getSync = await getSyncEntities(
+        toriiClient,
+        contractComponents as any,
+        undefined,
+        [],
+        [],
+        [],
+        3000,
+        true
     );
 
+    // Create client-side components that mirror the contract components
+    const clientComponents = createClientComponents({ contractComponents });
+
+    // Initialize the Dojo provider with t
+    // he manifest and RPC URL
+    const dojoProvider = new DojoProvider(config.manifest, config.rpcUrl);
+
+    // Set up event synchronization between the client and the Dojo network
+    const eventSync = getSyncEvents(
+        toriiClient,
+        contractComponents as any,
+        undefined,
+        [],
+        [],
+        []
+    );
+
+    // Set up the world client for interacting with smart contracts
+    const client = await setupWorld(dojoProvider);
+
+    // Return an object with all necessary components and functions for the Dojo application
     return {
-        network,
-        components,
-        systemCalls: createSystemCalls(network, components),
+        client,
+        clientComponents,
+        contractComponents,
+        systemCalls: createSystemCalls({client}, clientComponents, world),
+        publish: (typedData: string, signature: ArraySignatureType) => {
+            toriiClient.publishMessage(typedData, signature);
+        },
+        config,
+        dojoProvider,
+        toriiClient,
+        eventSync,
+        getSync,
     };
 }

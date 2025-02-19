@@ -8,14 +8,14 @@ interface HealthBarProps {
 const shimmerStyle: { [key: string]: React.CSSProperties } = {
     "red": {
         left: "2%",
-        top: "6.25%",
+        top: "5.25%",
         height: "8%",
         width: "32.5%",
         pointerEvents: "all"
     },
     "blue": {
         right: "2.5%",
-        top: "6.25%",
+        top: "5.25%",
         height: "8%",
         width: "32.5%",
         pointerEvents: "all"
@@ -25,14 +25,14 @@ const shimmerStyle: { [key: string]: React.CSSProperties } = {
 const fillStyle: { [key: string]: React.CSSProperties } = {
     "red": {
         left: "1%",
-        top: "4.5%",
+        top: "3.5%",
         height: "8%",
         width: "35%",
         pointerEvents: "all"
     },
     "blue": {
         right: "1%",
-        top: "4.5%",
+        top: "3.5%",
         height: "8%",
         width: "35%",
         pointerEvents: "all"
@@ -42,14 +42,14 @@ const fillStyle: { [key: string]: React.CSSProperties } = {
 const mainStyle: { [key: string]: React.CSSProperties } = {
     "red": {
         left: "1%",
-        top: "4.5%",
+        top: "3.5%",
         height: "8%",
         width: "35%",
         pointerEvents: "all"
     },
     "blue": {
         right: "1%",
-        top: "4.5%",
+        top: "3.5%",
         height: "8%",
         width: "35%",
         pointerEvents: "all"
@@ -58,7 +58,7 @@ const mainStyle: { [key: string]: React.CSSProperties } = {
 
 const baseTooltipStyle: React.CSSProperties = {
     position: "absolute",
-    top: "8%",
+    top: "7%",
     height: "3%",
     width: "3%",
     color: 'black', 
@@ -121,12 +121,38 @@ export const HealthBar: React.FC<HealthBarProps> = ({ castle, health }) => {
                 width: `35%`
             };
         } else {
-            return {
-                ...fillStyle[castle],
-                width: `${(health - TIER_THRESHOLDS[tier - 1]) / MAX_CASTLE_HP * 35}%`
-            };
+            if (tier > 0) {
+                //console.log(castle, (health - TIER_THRESHOLDS[tier - 1]) / MAX_CASTLE_HP);
+                return {
+                    ...fillStyle[castle],
+                    width: `${(health - TIER_THRESHOLDS[tier - 1]) / MAX_CASTLE_HP * 35}%`
+                };
+            }
+            else {
+                //console.log(castle, health / MAX_CASTLE_HP);
+                return {
+                    ...fillStyle[castle],
+                    width: `${health / MAX_CASTLE_HP * 35}%`
+                };
+            }
         }
     };
+
+    function getCastleTextStyle() {
+        if (castle == "red") {
+            return {
+                color: "black",
+                top: "0%",
+                left: "1%"
+            }
+        } else {
+            return {
+                color: "black",
+                top: "0%",
+                right: "1%"
+            }
+        }
+    }
 
     const updateHPShimmer = (health: number) => {
         if (health <= MAX_CASTLE_HP) {    
@@ -145,7 +171,9 @@ export const HealthBar: React.FC<HealthBarProps> = ({ castle, health }) => {
     return (
         <> 
             <div ref={healthBarDiv} onPointerEnter={handleMouseEnter} onPointerLeave={handleMouseLeave} >
-
+                <div className="svg-background" style={getCastleTextStyle()}>
+                    {castle == "red" ? "SOUTH HP" : "NORTH HP"}
+                </div>
                 {/* base health bar */}
                 <svg id={`${castle}-hp-fill}`} className="svg-background" style={updateHPFill(0, health)}>
                     <rect id="fill" x="4" y="4" width="100%" height="100%" fill={fillColor[castle]} />

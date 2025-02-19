@@ -3,6 +3,7 @@ import Modal from 'react-responsive-modal';
 import useUIStore from '../hooks/useUIStore';
 import { toast } from 'react-toastify';
 import { useUiSounds } from '../hooks/useUiSound';
+import { DEFAULT_TOAST_STYLE } from '../utils/constants';
 
 interface CastleButtonsProps {
     getNickname: (address: string) => Promise<string | undefined>;
@@ -28,7 +29,6 @@ const PayModal: React.FC<CastleButtonsProps> = ({ getNickname, gold, performPaym
         }
     }
     const onCloseConfirmModal = () => {
-        console.log("called close confirm");
         setConfirmOpen(false);
     }
 
@@ -40,44 +40,16 @@ const PayModal: React.FC<CastleButtonsProps> = ({ getNickname, gold, performPaym
         if (address.length > 14 && address.startsWith("0x")) {
             let toastId;
             try {
-                toastId = toast.loading(
-                    "Validating...",
-                    {
-                        style: {
-                            backgroundColor: "transparent", border: "none", boxShadow: "none",
-                            height: "173px",
-                            width: "274px",
-                            color: "white",
-                            textAlign: "center",
-                        },
-                        position: "bottom-center",
-                        bodyClassName: "toast-error",
-                        autoClose: 2000,
-                        hideProgressBar: true
-                    });
+                toastId = toast.loading("Validating...", DEFAULT_TOAST_STYLE.info);
                 const fetchedNickname = await getNickname(address);
                 setNickname(fetchedNickname || '');
                 console.log(`Fetched nickname for ${address}: ${fetchedNickname}`);
                 onOpenConfirmModal();
                 setErrorVisible(false);
             } catch (error: any) {
-                toast.dismiss(toastId);
+                toast.dismiss();
                 if (!error.toString().includes('nickname defined')) {
-                    toast.error(error.toString(), {
-                        style: {
-                            backgroundColor: "transparent", border: "none", boxShadow: "none",
-                            height: "173px",
-                            width: "274px",
-                            color: "white",
-                            textAlign: "center",
-                        },
-                        position: "bottom-center",
-                        bodyClassName: "toast-error",
-                        autoClose: 2000,
-                        hideProgressBar: true,
-                        closeOnClick: true,
-                        pauseOnHover: true
-                    });
+                    toast.error(error.toString(), DEFAULT_TOAST_STYLE.error);
                 } else {
                     onOpenConfirmModal();
                     setErrorVisible(false);
@@ -86,6 +58,7 @@ const PayModal: React.FC<CastleButtonsProps> = ({ getNickname, gold, performPaym
         } else {
             setErrorVisible(true);
         }
+        toast.dismiss();
     };
 
     const Pay = async () => {
@@ -96,38 +69,11 @@ const PayModal: React.FC<CastleButtonsProps> = ({ getNickname, gold, performPaym
             if (success) {
                 sendcoins.play();
                 toast.success(
-                    "💰 Payment sent!", {
-                    style: {
-                        backgroundColor: "transparent", border: "none", boxShadow: "none",
-                        height: "173px",
-                        width: "274px",
-                        color: "white",
-                        textAlign: "center",
-                    },
-                    position: "bottom-center",
-                    bodyClassName: "toast-error",
-                    autoClose: 2000,
-                    hideProgressBar: true,
-                    closeOnClick: true,
-                    pauseOnHover: true
-                });
+                    "💰 Payment sent!", DEFAULT_TOAST_STYLE.success);
             }
         } catch (error: any) {
-            toast.error(error.toString(), {
-                style: {
-                    backgroundColor: "transparent", border: "none", boxShadow: "none",
-                    height: "173px",
-                    width: "274px",
-                    color: "white",
-                    textAlign: "center",
-                },
-                position: "bottom-center",
-                bodyClassName: "toast-error",
-                autoClose: 2000,
-                hideProgressBar: true,
-                closeOnClick: true,
-                pauseOnHover: true
-            });
+            console.error(error);
+            toast.error(error.toString(), DEFAULT_TOAST_STYLE.error);
         }
     };
 

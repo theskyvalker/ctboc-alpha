@@ -23,7 +23,7 @@ export default function DisconnectModal() {
         <DialogTrigger asChild>
           <Button variant="ghost">{addressShort}</Button>
         </DialogTrigger>
-        <DialogContent>
+        <DialogContent className="disconnect-modal">
           <DialogHeader>Disconnect Wallet</DialogHeader>
           <div className="flex flex-col gap-4">
             <Button onClick={() => {

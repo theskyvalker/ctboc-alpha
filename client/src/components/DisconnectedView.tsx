@@ -27,11 +27,11 @@ const DisconnectedView: React.FC<DisconnectedViewProps> = ({ account, handleLogi
       <Background id="blue-fence" imageUrl="/blue fence.svg" />
       <Background id="red-foliage" imageUrl="/red foliage.svg" />
       <Background id="blue-foliage" imageUrl="/blue foliage.svg" />
-      <img id="left-banner" className="banner" src="/WAVY_BANNER2-export.gif" />
-      <img id="right-banner" className="banner" src="/WAVY_BANNER2-export-flip.gif" />
+      <img id="left-banner" className="banner" src="/WAVY_BANNER_thick_left.gif" />
+      <img id="right-banner" className="banner" src="/WAVY_BANNER_thick_right.gif" />
       <div className="center-menu">
-        <div className="image-button" onClick={handleLogin}>CONNECT WALLET</div>
         <Connect />
+        <div className="image-button" onClick={handleLogin}>GAME LOBBY</div>
         <AboutModal open={open} setOpen={setOpen}/>
       </div>
     </div>
