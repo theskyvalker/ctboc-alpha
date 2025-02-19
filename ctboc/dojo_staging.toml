@@ -1,0 +1,17 @@
+[world]
+description = "Call the Banners: On-Chain Edition"
+name = "Call the Banners"
+seed = "ctboc"
+
+[namespace]
+default = "ctboc"
+
+[env]
+rpc_url = "https://starknet-sepolia.public.blastapi.io/rpc/v0_7"
+account_address = ""
+private_key = ""
+
+[migration]
+
+[writers]
+"ctboc" = ["ctboc-actions"]

@@ -3,20 +3,20 @@ version = 1
 
 [[package]]
 name = "ctboc"
-version = "0.6.0"
+version = "1.0.6"
 dependencies = [
  "dojo",
 ]
 
 [[package]]
 name = "dojo"
-version = "0.6.0"
-source = "git+https://github.com/dojoengine/dojo?tag=v0.6.0#fc5ad790c1993713e59f3fc65739160f132f29f0"
+version = "1.0.6"
+source = "git+https://github.com/dojoengine/dojo?tag=v1.0.6#ba8ff0564e39b26ccbb81baaa843b3baf9644f24"
 dependencies = [
  "dojo_plugin",
 ]
 
 [[package]]
 name = "dojo_plugin"
-version = "0.3.11"
-source = "git+https://github.com/dojoengine/dojo?tag=v0.3.11#1e651b5d4d3b79b14a7d8aa29a92062fcb9e6659"
+version = "2.8.4"
+source = "git+https://github.com/dojoengine/dojo?tag=v1.0.6#ba8ff0564e39b26ccbb81baaa843b3baf9644f24"

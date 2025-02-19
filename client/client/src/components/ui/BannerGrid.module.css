@@ -1,0 +1,26 @@
+.trait_preview_grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-self: flex-start;
+    /*border: solid 4px red;*/
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+    scrollbar-width: none;
+}
+
+.trait_preview_container {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.trait_preview_img {
+    width: 100%;
+    height: auto;
+}
+
+.trait_preview_img:hover {
+    scale: 1.2;
+    cursor: pointer;
+}

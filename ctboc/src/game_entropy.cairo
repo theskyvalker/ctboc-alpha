@@ -57,7 +57,7 @@ impl ImplGameEntropy of IGameEntropy {
     /// @param next_update_block The block number for the next scheduled update.
     /// @return A new instance of GameEntropy.
     fn new(last_updated_block: u64, last_updated_time: u64, next_update_block: u64) -> GameEntropy {
-        let hash = ImplGameEntropy::get_hash(
+        let hash = Self::get_hash(
             last_updated_block, last_updated_time, next_update_block
         );
         GameEntropy { hash, last_updated_block, last_updated_time, next_update_block }

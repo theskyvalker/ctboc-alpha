@@ -1,0 +1,55 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #1a1a1a;
+    margin: 0;
+  }
+  
+  .buttonContainer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 1%;
+  }
+  
+  .button {
+    background-color: #000000;
+    color: #ffffff;
+    border: 0.2em transparent #ffffff;
+    padding: 0.5em 1em;
+    font-size: 0.8em;
+    cursor: pointer;
+    margin-left: 0.5em;
+  }
+  
+  .button:hover {
+    background-color: #ffffff;
+    color: #000000;
+  }
+  
+  .textarea {
+    flex-grow: 1;
+    background-color: #000000;
+    color: #ffffff;
+    font-size: 1em;
+    border: none;
+    outline: none;
+    resize: none;
+  }
+  
+  .miniTextarea {
+    flex-grow: 1;
+    background-color: #000000;
+    font-size: 1em;
+    outline: none;
+    resize: none;
+    color: #ffffff;
+  }

@@ -1,0 +1,61 @@
+# CtB: Onchain world address on sepolia
+world_address = "0x778c0ead2aea71e50066a2acda73c3f5e154d4390805864063a5e0234d471cf"
+ 
+# Default RPC URL configuration
+rpc = "https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/p3V_2b_18hNJy5z_F7ig_CRADf50Yyom"
+ 
+# Database configuration
+# Optional: If not specified, uses in-memory database
+db_dir = "/tmp/torii"
+ 
+# External URL for GraphQL Playground
+# Optional: Used in hosted environments
+# external_url = ""
+ 
+# Whether to open World Explorer in browser
+# Optional: Defaults to false
+# explorer = false
+ 
+# Server Options
+[server]
+http_addr = "127.0.0.1"
+http_port = 8080
+http_cors_origins = ["*"]
+ 
+# Relay Options
+[relay]
+port = 9090                   # TCP & UDP Quic transport
+webrtc_port = 9091            # WebRTC transport
+websocket_port = 9092         # WebSocket transport
+# relay.local_key_path = ""   # Optional: Path to identity key file, generated if none.
+# relay.cert_path = ""        # Optional: Path to certificate file for WebRTC
+ 
+# Indexing Options
+[indexing]
+events_chunk_size = 1024     # Size of events page to fetch
+blocks_chunk_size = 10240    # Blocks to process before DB commit
+index_pending = true         # Enable indexing pending blocks
+polling_interval = 500       # Polling interval in milliseconds
+max_concurrent_tasks = 100   # Maximum concurrent indexing tasks
+index_transactions = false   # Whether to index world transactions
+ 
+# Events Options
+[events]
+raw = true                  # Whether to index raw events
+historical = [              # Historical event message tags
+    "ctboc-Strike",
+    "ctboc-Spawn",
+    "ctboc-Enrollment",
+    "ctboc-Unenrollment",
+    "ctboc-Fortification",
+    "ctboc-Sharpening",
+    "ctboc-PlayerNickname",
+    "ctboc-Payment",
+    "ctboc-GameStageChange"
+]
+ 
+# Metrics Options
+[metrics]
+metrics = true            # Enable metrics server
+addr = "127.0.0.1"        # Metrics server address
+port = 9200               # Metrics server port

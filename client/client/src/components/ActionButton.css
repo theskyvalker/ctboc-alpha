@@ -1,0 +1,29 @@
+@keyframes breathing2 {
+    0% {
+        transform: scale(1);
+        filter: hue-rotate(20deg);
+    }
+
+    50% {
+        transform: scale(1.05);
+        filter: hue-rotate(-40deg);
+    }
+
+    100% {
+        transform: scale(1);
+        filter: hue-rotate(20deg);
+    }
+}
+
+.focused-button {
+    border: 4px ridge whitesmoke;
+    border-radius: 10%;
+    scale: 1.1;
+    animation: breathing2 2s ease-in-out infinite;
+    image-rendering: pixelated;
+    box-sizing: border-box;
+}
+
+.pressed {
+    transform: scale(0.95);
+}

@@ -1,0 +1,28 @@
+.scroll-content {
+    position: absolute;
+    overflow-y: auto;
+    height: 37%;
+    top: 50%;
+    left: 52%;
+    width: 45%;
+    transform: translateX(-50%) translateY(-50%);
+    overflow-y: auto;
+    font-weight: bold;
+}
+
+a {
+    color: blueviolet;
+    font-weight: bolder;
+}
+
+@keyframes scrollAppear {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}

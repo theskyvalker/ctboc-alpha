@@ -4,3 +4,6 @@ mod utils;
 mod game_settings;
 mod game_entropy;
 mod dice;
+mod interfaces {
+    mod ierc20;
+}

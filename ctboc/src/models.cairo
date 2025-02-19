@@ -1,7 +1,8 @@
 use starknet::ContractAddress;
 use array::ArrayTrait;
 
-#[derive(Model, Drop, Serde)]
+#[derive(Copy, Drop, Serde)]
+#[dojo::model]
 struct PlayerCooldowns {
     #[key]
     player: ContractAddress,
@@ -10,7 +11,8 @@ struct PlayerCooldowns {
     lastStrike: u64,
 }
 
-#[derive(Model, Drop, Copy, Serde)]
+#[derive(Copy, Drop, Serde)]
+#[dojo::model]
 struct PlayerEnrollment {
     #[key]
     address: ContractAddress,
@@ -20,7 +22,8 @@ struct PlayerEnrollment {
     index: u32
 }
 
-#[derive(Model, Drop, Copy, Serde)]
+#[derive(Copy, Drop, Serde)]
+#[dojo::model]
 struct GamePlayers {
     #[key]
     gameId: u128,
@@ -29,7 +32,8 @@ struct GamePlayers {
     address: ContractAddress
 }
 
-#[derive(Model, Drop, Copy, Serde)]
+#[derive(Copy, Drop, Serde)]
+#[dojo::model]
 struct GlobalPlayerStats {
     #[key]
     address: ContractAddress,
@@ -38,7 +42,8 @@ struct GlobalPlayerStats {
     totalStrikeDamage: u128
 }
 
-#[derive(Model, Drop, Copy, Serde)]
+#[derive(Copy, Drop, Serde)]
+#[dojo::model]
 struct Player {
     #[key]
     address: ContractAddress,
@@ -49,10 +54,13 @@ struct Player {
     sharpened: bool,
     totalStrikes: u8,
     totalStrikeDamage: u32,
-    nickname: felt252
+    nickname: felt252,
+    strikesAgainstCastle1: u16,
+    strikesAgainstCastle2: u16
 }
 
-#[derive(Model, Copy, Drop, Serde)]
+#[derive(Copy, Drop, Serde)]
+#[dojo::model]
 struct Game {
     #[key]
     gameId: u128,
@@ -63,13 +71,21 @@ struct Game {
     stage: u8,
     startTime: u128,
     nextPlayerIndex: u32,
-    numPlayers: u128
+    numPlayers: u32,
+    prizePool: u256,
+    prizesDistributed: bool
 }
 
-#[derive(Model, Copy, Drop, Serde)]
+#[derive(Copy, Drop, Serde)]
+#[dojo::model]
 struct GameWorld {
     #[key]
     metaId: felt252, // always 'game'
     nextGameId: u128,
-    entropy: felt252
+    entropy: felt252,
+    feeTokenAddress: ContractAddress,
+    adminAddress: ContractAddress,
+    treasuryAddress: ContractAddress,
+    treasuryBalance: u256,
+    pixelBannersAddress: ContractAddress
 }
